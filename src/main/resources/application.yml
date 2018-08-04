@@ -61,7 +61,7 @@ pagehelper:
 file:
     server:
            avatar:
-                  url: http://localhost:8081/codeland/avatar
+                  url: http://localhost:8088/codeland/avatar
     location:
           path: /usr/local/soft/nginx/html/codeland/avatar
 

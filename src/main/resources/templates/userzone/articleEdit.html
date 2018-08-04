@@ -105,7 +105,6 @@
 <script th:inline="javascript">
     var loginUsername = [[${#authentication.name}]];
     var articleId = [[${article.id}]];
-
     $("#md").markdown({
         language: 'zh',
         fullscreen: {
@@ -120,7 +119,7 @@
 
     $("#uploadImage").click(function() {
         $.ajax({
-            url: 'http://localhost:8081/codeland/article',
+            url: 'http://localhost:8088/codeland/article',
             type: 'POST',
             cache: false,
             data: new FormData($('#uploadformid')[0]),
@@ -174,8 +173,7 @@
             success: function(data){
                 if (data.success) {
                     // 成功后，重定向
-                    // window.location = ;
-                    window.location = "/article/"+loginUsername+"/"+articleId;
+                    window.location = "/user/"+loginUsername+"/mainPage";
                 } else {
                     toastr.error("error!"+data.message);
                 }

@@ -62,9 +62,10 @@
     select
     u.*,
     r.id as rid,r.name as rname
-    from sys_user u join sys_user_role ur on ur.user_id = u.id
-    join sys_role r on r.id = ur.role_id
-    where u.username = #{username} and u.active != 0
+    from sys_user u
+    left join sys_user_role ur on ur.user_id = u.id
+    left join sys_role r on r.id = ur.role_id
+    where u.username = #{username}
   </select>
 
   <select id="findByActiveCode" parameterType="string" resultType="com.wayming.codeland.pojo.eo.SysUser">

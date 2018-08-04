@@ -55,8 +55,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Autowired
     private JavaMailSender javaMailSender;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Value("${file.server.avatar.url}")
     private String fileServerAvatarUrl;
@@ -68,19 +66,19 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public ServerResponseVO rePassword(String username, String newPassword, String oldPassword) {
         SysUser user = sysUserMapper.findByUsername(username);
-        String encodeOldPassword = passwordEncoder.encode(oldPassword);
-        if (!user.getPassword().equals(encodeOldPassword)) {
+//        String encodeOldPassword = passwordEncoder.encode(oldPassword);
+        if (!oldPassword.equals(user.getPassword())) {
             return ServerResponseVO.sendFail(RestStatusConstant.PASSWORD_ERROR, "旧密码错误");
         }
-        user.setPassword(passwordEncoder.encode(newPassword));
+        user.setPassword(newPassword);
         sysUserMapper.updateByPrimaryKeySelective(user);
         return ServerResponseVO.sendSuccess("更新成功");
     }
 
     @Override
     public ServerResponseVO saveUser(SysUser user) {
-        PasswordEncoder encoder = new BCryptPasswordEncoder();
-        user.setPassword(encoder.encode(user.getPassword()));
+//        PasswordEncoder encoder = new BCryptPasswordEncoder();
+//        user.setPassword(encoder.encode(user.getPassword()));
         sysUserMapper.insertSelective(user);
         return ServerResponseVO.sendSuccess("添加成功");
     }
@@ -98,9 +96,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         MimeMessage message = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = null;
         try {
-
-//            PasswordEncoder encoder = new BCryptPasswordEncoder();
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
             //send email
             helper = new MimeMessageHelper(message, true);
             helper.setFrom("969130721@qq.com");

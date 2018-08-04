@@ -2,12 +2,16 @@ package com.wayming.codeland.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 /**
@@ -23,24 +27,24 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     @Autowired
     private UserDetailsService userDetailsService;
 
-//	@Bean
-//	public static NoOpPasswordEncoder passwordEncoder() {
-//		return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();
-//	}
+	@Bean
+	public static NoOpPasswordEncoder passwordEncoder() {
+		return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();
+	}
 
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();   // 使用 BCrypt 加密
-    }
-//
 //    @Bean
-//    public AuthenticationProvider authenticationProvider() {
-//        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-//        authenticationProvider.setUserDetailsService(userDetailsService);
-////        authenticationProvider.setPasswordEncoder(passwordEncoder); // 设置密码加密方式
-//        return authenticationProvider;
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();   // 使用 BCrypt 加密
 //    }
+//
+/*    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(userDetailsService);
+//        authenticationProvider.setPasswordEncoder(passwordEncoder); // 设置密码加密方式
+        return authenticationProvider;
+    }*/
 
 
     /**
@@ -67,15 +71,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 //		http.headers().frameOptions().sameOrigin(); // 允许来自同一来源的H2 控制台的请求
     }
 
-//    /**
-//     * 认证信息管理
-//     *
-//     * @param auth
-//     * @throws Exception
-//     */
-//    @Autowired
-//    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.userDetailsService(userDetailsService);
-////        auth.authenticationProvider(authenticationProvider());
-//    }
+/*    *//**
+     * 认证信息管理
+     *
+     * @param auth
+     * @throws Exception
+     *//*
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService);
+        auth.authenticationProvider(authenticationProvider());
+    }*/
 }
