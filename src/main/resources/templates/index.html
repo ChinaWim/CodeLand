@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: header}">
+</head>
+<body>
+<!--公告-->
+<div class=" container alert alert-success" role="alert">
+    <div class="row">
+        <div class="col-8">
+            公告：欢迎加入12345678群，与优秀Coder一起分享技术!
+        </div>
+
+    </div>
+</div>
+
+<!-- /.container -->
+<div class="container my-2">
+    <div class="row">
+        <!--article-->
+        <div class="col-8 " >
+            <div th:each="article,i: ${page.data}"  class="card " style="width: 30rem;"
+                 th:classappend="${i.count gt 1} ? 'my-4':''">
+                <!--<img class=" card-img-top" height="300px" src="/images/gk.jpeg" alt="Card image cap">-->
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a th:href="@{'/user/'+${article.user.username}+'/mainPage'}">
+                            <img th:src="${article.user.avatar} == null ? '/images/default-avatar.jpg' : ${article.user.avatar}" class="user-avatar-50" />
+                        </a>
+                        <a th:href="@{'/article/'+${article.user.username}+'/'+${article.id}}" th:text="${article.title}"></a>
+                    </h5>
+                    <p class="card-text" th:text="${article.summary}">
+                        内容
+                    </p>
+                    <a th:href="@{'/article/'+${article.user.username}+'/'+${article.id}}" class="btn btn-sm btn-primary">点击查看</a>
+                    <span style="font-size: 0.8em">
+                    <a  th:href="@{'/user/'+${article.user.username}+'/mainPage'}">[[${article.user.nickname}]]</a>
+
+                    发表于 [[${#dates.format(article.createTime, 'yyyy-MM-dd HH:mm')}]]
+                    <i class="fa fa-eye" aria-hidden="true">[[${article.readCount}]]</i>
+                    <i class="fa fa-heart-o" aria-hidden="true">[[${article.voteCount}]]</i>
+                    <i class="fa fa-comment-o" aria-hidden="true">[[${article.commentCount}]]</i>
+                    </span>
+                </div>
+            </div>
+
+            <div th:if="${page.data.size() ne 0}"  >
+                <div   th:replace="~{fragments/page :: page}"></div>
+            </div>
+            <div class="text-center" th:if="${page.data.size() eq 0}" >
+                emmmmm........找不到文章
+            </div>
+
+        </div><!--article-->
+
+
+        <!-- 右侧栏目 -->
+        <div class="col-md-4">
+            <div>
+                <!-- 热门标签 -->
+                <div class="card  ">
+                    <h5 class="card-header"><i class="fa fa-tags" aria-hidden="true"></i> 热门标签</h5>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <a href="/blogs?tag=1"> <span class="badge badge-info">Web </span></a>
+                                <a href="/blogs?tag=1"> <span class="badge badge-info">Web </span></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 热门用户 -->
+                <div class="card my-4">
+                    <h5 class="card-header"><i class="fa fa-users" aria-hidden="true"></i> 热门用户</h5>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+									<span th:each="hotUser : ${hotUserPage.data}">
+					                  <a th:href="@{'/user/'+${hotUser.username}+'/mainPage'}" th:title="${hotUser.username}">
+					                    <img   th:src="${hotUser.avatar} == null ? '/images/default-avatar.jpg' : ${hotUser.avatar}"
+                                               class="user-avatar-50"
+                                               th:alt="${hotUser.username}">
+					                  </a>
+					                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 热门文章 -->
+                <div class="card my-4">
+                    <h5 class="card-header"><i class="fa fa-fire" aria-hidden="true"></i> 热门文章</h5>
+
+                    <ul class="list-group">
+                        <a th:each="hotArticle,i : ${hotPage.data}" th:href="@{'/article/'+${hotArticle.user.username}+'/'+${hotArticle.id}}" class="list-group-item" th:title="${hotArticle.user.nickname}">
+                            [[${hotArticle.title}]]
+                            <span th:classappend="${i.index } eq 0 ?
+                             'badge-danger': (${i.index } eq 1 ?
+                             'badge-warning':(${i.index } eq 2 ?
+                              'badge-info':'badge-default'))"
+                                   class="badge float-right  badge-pill">[[${hotArticle.readCount}]]
+                            </span>
+                        </a>
+
+                    </ul>
+
+                </div>
+
+                <!-- 最新发布 -->
+                <div class="card my-4">
+                    <h5 class="card-header"><i class="fa fa-line-chart" aria-hidden="true"></i> 最新发布</h5>
+                    <div class="list-group">
+                        <ul class="list-group">
+                            <a th:each="newArticle : ${newPage.data}" th:href="@{'/article/'+${newArticle.user.username}+'/'+${newArticle.id}}" class="list-group-item" th:title="${newArticle.user.nickname}">
+                                [[${newArticle.title}]]
+                            </a>
+                        </ul>
+                    </div>
+
+                </div>
+            </div>
+
+        </div><!-- 右侧栏目 -->
+
+    </div> <!--row-->
+
+</div><!-- /.container -->
+<!--footer-->
+<div th:replace="~{fragments/footer :: footer }">
+</div>
+<script th:inline="javascript">
+    $(function () {
+        var keyword = $("#keyword").val();
+        var sort = [[${sort}]];
+        $.each($(".tbpage-item"),function (index,data) {
+            var pageData = $(data);
+            pageData.attr("href","/index?pageNo="+pageData.attr("pageIndex")
+                +"&keyword="+keyword+"&sort="+sort);
+        });
+
+        // $(".tbpage-size").change(function () {
+        //     var pageNo =  $(this).attr("pageIndex");
+        //     var pageSize = $(this).val();
+        //     location.href ="/index?pageNo="+pageNo+"&pageSize="+pageSize+"&keyword="+keyword+"&sort="+sort;
+        // });
+    });
+</script>
+</body>
+
+</html>

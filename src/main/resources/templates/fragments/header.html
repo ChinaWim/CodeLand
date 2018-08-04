@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4"
+      data-th-fragment="header">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <!-- CSRF -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <!-- default header name is X-CSRF-TOKEN -->
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+    <link href="/bootstrap/css/bootstrap.css" th:href="@{/bootstrap/css/bootstrap.css}" rel="stylesheet">
+    <link href="/font-awesome/css/font-awesome.css" th:href="@{/font-awesome/css/font-awesome.css}" rel="stylesheet">
+    <link href="/css/nprogress.css" th:href="@{/css/nprogress.css}" rel="stylesheet">
+    <link href="/css/toastr.min.css" th:href="@{/css/toastr.min.css}" rel="stylesheet">
+    <link href="/css/tagsinput.css" th:href="@{/css/tagsinput.css}" rel="stylesheet">
+    <!-- thinker-md CSS -->
+    <link href="/css/thinker-md.vendor.css" th:href="@{/css/thinker-md.vendor.css}" rel="stylesheet">
+
+    <link href="/css/main.css" th:href="@{/css/main.css}" rel="stylesheet">
+
+    <link href="/css/cropbox.css" th:href="@{/css/cropbox.css}" rel="stylesheet">
+</head>
+<body>
+<!--导航栏-->
+<!--navbar navbar-expand-lg navbar-dark bg-dark-->
+<!--navbar navbar-inverse bg-inverse navbar-toggleable-md-->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark " >
+    <div class="container">
+
+        <img class="logo-70" src="/images/LOGO.png"/>&nbsp;&nbsp;
+        <a class="navbar-brand" th:href="@{/}" >极客岛</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li th:classappend="${sort eq 'new'}?'active':''" class="nav-item ">
+                    <a class="nav-link" th:href="@{'/index?sort=new'}">最新<span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item " th:classappend="${sort eq 'hot'}?'active':''">
+                    <a class="nav-link" th:href="@{'/index?sort=hot'}">最热<span class="sr-only">(current)</span></a>
+                </li>
+
+                <li>
+                    <form class="form-inline mt-2 mt-md-0">
+                        <input th:value="${keyword}" name = "keyword" id = "keyword" class="form-control mr-sm-2" type="text" placeholder="搜索全岛">
+                        <a href="javascript:location.href ='/index/?keyword='+$('#keyword').val()" class="btn btn-outline-secondary my-2 my-sm-0">
+                            <i class="fa fa-search" aria-hidden="true"></i>
+                        </a>
+                    </form>
+                </li>
+            </ul>
+            <div>
+                <!--<a class="dropdown-item" href = "javascript:void (0)" id = "logout" >退出</a>-->
+            </div>
+            <div sec:authorize="isAuthenticated()">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span sec:authentication="name"></span>
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <div>
+                                <a class="dropdown-item" th:href="@{'/user/'+ ${#authentication.name} +'/mainPage'}">个人主页</a>
+                            </div>
+                            <div>
+                                <a class="dropdown-item" th:href="@{'/user/' + ${#authentication.name} + '/profilePage'}">个人设置</a>
+                            </div>
+                            <div>
+                                <a class="dropdown-item" th:href="@{'/user/' + ${#authentication.name} + '/friendPage'}">我的好友
+                                </a>
+                            </div>
+                            <div>
+                                <a class="dropdown-item"
+                                   th:href="@{'/article/' + ${#authentication.name} + '/writeArticlePage'}">写博客</a>
+                            </div>
+
+                            <div class="dropdown-divider"></div>
+                            <div>
+                                <form action="/logout" th:action="@{/user/logout}" method="post">
+                                    <input style="width: 100%" class="btn btn-light" type="submit" value="退出">
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div sec:authorize="isAnonymous()">
+                <button onclick="location.href='/user/loginPage'" type="button" class=" btn btn-info">登录</button>
+
+                <button onclick="location.href='/user/registerPage'" type="button" class=" btn btn-light">注册</button>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+
+</html>

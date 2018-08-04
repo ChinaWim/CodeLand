@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wayming.codeland.dao.CatalogMapper" >
+  <resultMap id="BaseResultMap" type="com.wayming.codeland.pojo.eo.Catalog" >
+    <constructor >
+      <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="user_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+    </constructor>
+  </resultMap>
+
+  <resultMap id="BaseWithArticleResultMap" type="com.wayming.codeland.pojo.eo.Catalog" >
+    <constructor >
+      <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="user_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="name" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+    </constructor>
+    <collection property="articleList" ofType="com.wayming.codeland.pojo.eo.Article">
+      <id property="id" column="article_id"/>
+    </collection>
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, user_id, name, create_time, update_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from catalog
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="listCatalogByUserId" parameterType="int" resultMap="BaseWithArticleResultMap">
+    select c.id, c.user_id, c.name, c.create_time, c.update_time,ac.article_id
+    from catalog c left join article_catalog ac on c.id = ac.catalog_id
+    where user_id = #{userId};
+  </select>
+
+  <select id="listCatalogByArticleId" resultType="com.wayming.codeland.pojo.eo.Catalog">
+ select c.id, c.user_id, c.name, c.create_time, c.update_time,ac.article_id
+    from catalog c  join article_catalog ac on c.id = ac.catalog_id
+    where ac.article_id = #{articleId};
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from catalog
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyProperty="id" parameterType="com.wayming.codeland.pojo.eo.Catalog" >
+    insert into catalog (id, user_id, name)
+    values (#{id,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" keyProperty="id"  parameterType="com.wayming.codeland.pojo.eo.Catalog" >
+    insert into catalog
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.wayming.codeland.pojo.eo.Catalog" >
+    update catalog
+    <set >
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.wayming.codeland.pojo.eo.Catalog" >
+    update catalog
+    set user_id = #{userId,jdbcType=INTEGER},
+      name = #{name,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

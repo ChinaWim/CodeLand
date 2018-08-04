@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wayming.codeland.dao.FriendMapper" >
+  <resultMap id="BaseResultMap" type="com.wayming.codeland.pojo.eo.Friend" >
+    <constructor >
+      <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="user_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="friend_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="active" jdbcType="BIT" javaType="java.lang.Boolean" />
+      <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+    </constructor>
+  </resultMap>
+
+  <resultMap id="BaseWithUserResutlMap" type="com.wayming.codeland.pojo.eo.Friend" >
+    <constructor >
+      <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="user_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="friend_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="active" jdbcType="BIT" javaType="java.lang.Boolean" />
+      <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+    </constructor>
+    <association property="friendUser" javaType="com.wayming.codeland.pojo.eo.SysUser">
+      <result column="user_username" property="username"></result>
+      <result column="user_nickname" property="nickname"></result>
+      <result column="user_realname" property="realname"></result>
+      <result column="user_email" property="email"></result>
+      <result column="user_avatar" property="avatar"></result>
+    </association>
+  </resultMap>
+
+
+  <sql id="Base_Column_List" >
+    id, user_id, friend_id, active, create_time, update_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from friend
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="listFriendByUserId" resultMap="BaseWithUserResutlMap">
+  select f.id, f.user_id, f.friend_id, f.active, f.create_time, f.update_time,
+  u.username user_username,u.nickname user_nickname, u.realname user_realname,
+  u.email user_email,u.avatar user_avatar
+  from friend f join sys_user u on f.friend_id = u.id
+  where f.user_id = #{userId} and f.active != 0;
+  </select>
+
+  <select id="listNewFriendByUserId" resultMap="BaseWithUserResutlMap">
+   select f.id, f.user_id, f.friend_id, f.active, f.create_time, f.update_time,
+    u.username user_username,u.nickname user_nickname, u.realname user_realname,
+    u.email user_email,u.avatar user_avatar
+    from friend f join sys_user u on f.user_id = u.id
+    where f.friend_id = #{userId} and f.active = 0;
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from friend
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="deleteFriendById">
+    delete from friend
+    where friend_id = #{friendId}
+  </delete>
+
+  <insert id="insert" parameterType="com.wayming.codeland.pojo.eo.Friend" >
+    insert into friend (id, user_id, friend_id, 
+      active)
+    values (#{id,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{friendId,jdbcType=INTEGER}, 
+      #{active,jdbcType=BIT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.wayming.codeland.pojo.eo.Friend" >
+    insert into friend
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="friendId != null" >
+        friend_id,
+      </if>
+      <if test="active != null" >
+        active,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="friendId != null" >
+        #{friendId,jdbcType=INTEGER},
+      </if>
+      <if test="active != null" >
+        #{active,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.wayming.codeland.pojo.eo.Friend" >
+    update friend
+    <set >
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="friendId != null" >
+        friend_id = #{friendId,jdbcType=INTEGER},
+      </if>
+      <if test="active != null" >
+        active = #{active,jdbcType=BIT},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.wayming.codeland.pojo.eo.Friend" >
+    update friend
+    set user_id = #{userId,jdbcType=INTEGER},
+      friend_id = #{friendId,jdbcType=INTEGER},
+      active = #{active,jdbcType=BIT}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="acceptFriend" parameterType="integer">
+    update friend
+    set active = 1
+    where user_id = #{myId} and friend_id = #{friendId}
+  </update>
+</mapper>

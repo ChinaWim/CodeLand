@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="~{fragments/header :: header}">
+</head>
+<body>
+<style type="text/css">
+
+    @import "/css/emoji/nature.css";
+    @import "/css/emoji/object.css";
+    @import "/css/emoji/people.css";
+    @import "/css/emoji/place.css";
+    @import "/css/emoji/Sysmbols.css";
+    @import "/css/emoji/twemoji.css";
+
+</style>
+<!-- Page Content -->
+<div class="container my-4">
+    <div class="row">
+        <!-- Blog Entries Column -->
+        <div class="col-md-8">
+            <!-- Blog Post -->
+            <div class="card mb-4">
+                <div class="card-body" >
+                    <input type="hidden" th:value="${article.id}" name="id"  id="articleId">
+                    <input  type="text" th:value="${article.title}" class="form-control" placeholder="请填写博客标题"  id="title" name="title"   maxlength="50">
+                    <textarea th:text="${article.summary}"   class="form-control  my-2" placeholder="请填写博客摘要"  id="summary" name="summary"   maxlength="300">
+                    </textarea>
+                    <hr>
+                    <textarea th:text="${article.content}"  id="md" data-provide="markdown" data-hidden-buttons="cmdImage"
+                              name="content"  >
+
+                    </textarea>
+                    <hr>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧栏目 -->
+        <div class="col-md-4">
+            <!-- 文章目录 -->
+            <div class="card ">
+                <h5 class="card-header"><i class="fa fa-file-image-o" aria-hidden="true"></i> 图片上传</h5>
+                <div class="card-body">
+                    <div class="row mt-1">
+                        <div  class="col-lg-12">
+                            <form  enctype="multipart/form-data"  id="uploadformid"  >
+                                <input type="file" name="file" accept="image/png,image/gif,image/jpeg" id="file">
+                                <button class="btn btn-primary float-right"  type="button" id="uploadImage" >插入</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 图片上传 -->
+            <div class="card ">
+                <h5 class="card-header"><i class="fa fa-cog" aria-hidden="true"></i> 博客设置</h5>
+                <div class="card-body">
+                    <div class="row mt-1">
+                        <div  class="col-lg-12">
+                            标签：<input id = "tags" name="tags" data-role="tagsinput" type="text"  th:value="${article.tags}" class="form-control form-control-tag">
+                        </div>
+                    </div>
+                    <div class="row mt-1">
+                        <div  class="col-lg-12">
+                            分类：<select id="catalog" name="catalogId" class="form-control form-control-chosen" data-placeholder="请选择">
+                            <option th:value="${catalog.id}" th:each="catalog :${catalogList}">
+                                [[${catalog.name}]]
+                            </option>
+                        </select>
+                        </div>
+                        <div  class="col-lg-12">
+                            类型：<select  name="type" id = "type" class="form-control form-control-chosen" data-placeholder="请选择">
+                            <option  value="0">
+                                原创
+                            </option>
+                            <option  value="1">
+                                翻译
+                            </option>
+                            <option  value="2">
+                                转载
+                            </option>
+                        </select>
+                        </div>
+
+                    </div>
+                    <div class="row mt-1">
+                        <div  class="col-lg-12">
+                            <button class="btn btn-primary float-right" id="submitArticle"  >发布</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- /.row -->
+
+</div>
+<!-- /.container -->
+
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<script th:inline="javascript">
+    var loginUsername = [[${#authentication.name}]];
+    var articleId = [[${article.id}]];
+
+    $("#md").markdown({
+        language: 'zh',
+        fullscreen: {
+            enable: true
+        },
+        height:600,
+        resize:'vertical',
+        localStorage:'md',
+        imgurl: 'http://localhost:8080/file',
+        base64url: 'http://localhost:8080/file'
+    });
+
+    $("#uploadImage").click(function() {
+        $.ajax({
+            url: 'http://localhost:8081/codeland/article',
+            type: 'POST',
+            cache: false,
+            data: new FormData($('#uploadformid')[0]),
+            processData: false,
+            contentType: false,
+            success: function(data){
+                var mdcontent=$("#md").val();
+                $("#md").val(mdcontent + "\n![]("+data +") \n");
+
+            }
+        }).done(function(res) {
+            $('#file').val('');
+        }).fail(function(res) {});
+    });
+
+    // 发布文章
+    $("#submitArticle").click(function() {
+        // 获取 CSRF Token
+        var csrfToken = $("meta[name='_csrf']").attr("content");
+        var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+        if ($('#title').val().trim().length <=0 ){
+            toastr.error("标题不能为空");
+            $('#title').focus();
+            return false;
+        }
+        if ($('#summary').val().trim().length <=0 ){
+            $('#summary').focus();
+            toastr.error("摘要不能为空");
+            return false;
+        }
+        if ($('#md').val().trim().length <=0 ){
+            toastr.error("内容不能为空");
+            $('#md').focus();
+            return false;
+        }
+        $.ajax({
+            url: '/article/'+ loginUsername + '/saveArticle',
+            type: 'POST',
+            async: true,
+            data:{"id":$('#articleId').val(),
+                "title": $('#title').val(),
+                "summary": $('#summary').val(),
+                "content": $('#md').val(),
+                "catalogId":$("#catalog").val(),
+                "type":$('#type').val(),
+                "tags":$('#tags').val(),
+            },
+            beforeSend:function(request) {
+                request.setRequestHeader(csrfHeader, csrfToken); // 添加  CSRF Token
+            },
+            success: function(data){
+                if (data.success) {
+                    // 成功后，重定向
+                    // window.location = ;
+                    window.location = "/article/"+loginUsername+"/"+articleId;
+                } else {
+                    toastr.error("error!"+data.message);
+                }
+            },
+            error : function() {
+                toastr.error("error!");
+            }
+        })
+    });
+
+</script>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wayming.codeland.dao.ArticleMapper" >
+  <resultMap id="BaseResultMap" type="com.wayming.codeland.pojo.eo.Article" >
+    <constructor >
+      <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="user_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="title" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="summary" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="content" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="html_content" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="images" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="read_count" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="comment_count" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="vote_count" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="type" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="status" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="tags" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="category_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+    </constructor>
+  </resultMap>
+
+  <resultMap id="BaseWithUserResultMap" type="com.wayming.codeland.pojo.eo.Article" >
+    <constructor >
+      <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="user_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="title" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="summary" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="content" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="html_content" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="images" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="read_count" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="comment_count" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="vote_count" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="type" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="status" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="tags" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="category_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+    </constructor>
+    <association property="user"  javaType="com.wayming.codeland.pojo.eo.SysUser" >
+      <result column="user_username" property="username" javaType="java.lang.String" />
+      <result column="user_realname" property="realname" javaType="java.lang.String" />
+      <result column="user_nickname" property="nickname" javaType="java.lang.String" />
+      <result column="user_bio" property="bio" javaType="java.lang.String" />
+      <result column="user_avatar" property="avatar" javaType="java.lang.String" />
+    </association>
+  </resultMap>
+
+
+  <sql id="Base_Column_List" >
+    id, user_id, title, summary, content, html_content, images, read_count, comment_count, 
+    vote_count, type, status, tags, category_id, create_time, update_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseWithUserResultMap" parameterType="java.lang.Integer" >
+    select
+    a.*,
+    u.username user_username,u.realname user_realname,u.nickname user_nickname,
+    u.bio user_bio,u.avatar user_avatar
+    from article a join sys_user  u on a.user_id = u.id
+    where a.id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="listArticle" parameterType="map" resultMap="BaseWithUserResultMap">
+    select
+    a.*,
+    u.username user_username,u.realname user_realname,u.nickname user_nickname,
+    u.bio user_bio,u.avatar user_avatar
+    from article a join sys_user  u on a.user_id = u.id
+    <where>
+      <if test="keyword != null and keyword != '' ">
+        and (
+        tags like #{keyword}
+        or title like #{keyword}
+        or summary like #{keyword}
+        or content like #{keyword})
+      </if>
+    </where>
+    <if test="sort != null and sort eq 'hot' ">
+      order by  read_count desc,vote_count desc, comment_count desc, create_time desc
+    </if>
+    <if test="sort == null or sort eq '' or sort eq 'new' ">
+      order by create_time desc
+    </if>
+  </select>
+
+  <select id="listArticleByUserId" parameterType="map" resultMap="BaseWithUserResultMap">
+    select
+    a.*,
+    u.username user_username,u.realname user_realname,u.nickname user_nickname,
+    u.bio user_bio,u.avatar user_avatar
+    from article a join sys_user  u on a.user_id = u.id
+    <where>
+      user_id = #{userId}
+      <if test="keyword != null and keyword != '' ">
+        and (
+        tags like #{keyword}
+        or title like #{keyword}
+        or summary like #{keyword}
+        or content like #{keyword})
+      </if>
+    </where>
+    <if test="sort != null and sort eq 'hot' ">
+      order by  read_count desc,vote_count desc, comment_count desc, create_time desc
+    </if>
+    <if test="sort == null or sort eq '' or sort eq 'new' ">
+      order by create_time desc
+    </if>
+
+  </select>
+
+
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from article
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" keyProperty="id" parameterType="com.wayming.codeland.pojo.eo.Article" >
+    insert into article (id, user_id, title, 
+      summary, content, html_content, 
+      images, read_count, comment_count, 
+      vote_count, type, status, 
+      tags, category_id)
+    values (#{id,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{title,jdbcType=VARCHAR}, 
+      #{summary,jdbcType=VARCHAR}, #{content,jdbcType=VARCHAR}, #{htmlContent,jdbcType=VARCHAR}, 
+      #{images,jdbcType=VARCHAR}, #{readCount,jdbcType=INTEGER}, #{commentCount,jdbcType=INTEGER}, 
+      #{voteCount,jdbcType=INTEGER}, #{type,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
+      #{tags,jdbcType=VARCHAR}, #{categoryId,jdbcType=INTEGER} )
+  </insert>
+  <insert id="insertSelective" keyProperty="id" parameterType="com.wayming.codeland.pojo.eo.Article" >
+    insert into article
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="title != null" >
+        title,
+      </if>
+      <if test="summary != null" >
+        summary,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+      <if test="htmlContent != null" >
+        html_content,
+      </if>
+      <if test="images != null" >
+        images,
+      </if>
+      <if test="readCount != null" >
+        read_count,
+      </if>
+      <if test="commentCount != null" >
+        comment_count,
+      </if>
+      <if test="voteCount != null" >
+        vote_count,
+      </if>
+      <if test="type != null" >
+        type,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="tags != null" >
+        tags,
+      </if>
+      <if test="categoryId != null" >
+        category_id,
+      </if>
+
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="summary != null" >
+        #{summary,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="htmlContent != null" >
+        #{htmlContent,jdbcType=VARCHAR},
+      </if>
+      <if test="images != null" >
+        #{images,jdbcType=VARCHAR},
+      </if>
+      <if test="readCount != null" >
+        #{readCount,jdbcType=INTEGER},
+      </if>
+      <if test="commentCount != null" >
+        #{commentCount,jdbcType=INTEGER},
+      </if>
+      <if test="voteCount != null" >
+        #{voteCount,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        #{type,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="tags != null" >
+        #{tags,jdbcType=VARCHAR},
+      </if>
+      <if test="categoryId != null" >
+        #{categoryId,jdbcType=INTEGER},
+      </if>
+
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.wayming.codeland.pojo.eo.Article" >
+    update article
+    <set >
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=INTEGER},
+      </if>
+      <if test="title != null" >
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="summary != null" >
+        summary = #{summary,jdbcType=VARCHAR},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+      <if test="htmlContent != null" >
+        html_content = #{htmlContent,jdbcType=VARCHAR},
+      </if>
+      <if test="images != null" >
+        images = #{images,jdbcType=VARCHAR},
+      </if>
+      <if test="readCount != null" >
+        read_count = #{readCount,jdbcType=INTEGER},
+      </if>
+      <if test="commentCount != null" >
+        comment_count = #{commentCount,jdbcType=INTEGER},
+      </if>
+      <if test="voteCount != null" >
+        vote_count = #{voteCount,jdbcType=INTEGER},
+      </if>
+      <if test="type != null" >
+        type = #{type,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="tags != null" >
+        tags = #{tags,jdbcType=VARCHAR},
+      </if>
+      <if test="categoryId != null" >
+        category_id = #{categoryId,jdbcType=INTEGER},
+      </if>
+
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.wayming.codeland.pojo.eo.Article" >
+    update article
+    set user_id = #{userId,jdbcType=INTEGER},
+      title = #{title,jdbcType=VARCHAR},
+      summary = #{summary,jdbcType=VARCHAR},
+      content = #{content,jdbcType=VARCHAR},
+      html_content = #{htmlContent,jdbcType=VARCHAR},
+      images = #{images,jdbcType=VARCHAR},
+      read_count = #{readCount,jdbcType=INTEGER},
+      comment_count = #{commentCount,jdbcType=INTEGER},
+      vote_count = #{voteCount,jdbcType=INTEGER},
+      type = #{type,jdbcType=INTEGER},
+      status = #{status,jdbcType=INTEGER},
+      tags = #{tags,jdbcType=VARCHAR},
+      category_id = #{categoryId,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="incrementReadCount" parameterType="integer">
+    update article
+    set read_count = read_count + 1
+    where id = #{id}
+  </update>
+
+  <update id="incrementCommentCount" parameterType="integer">
+    update article
+    set comment_count = comment_count + 1
+    where id = #{id}
+  </update>
+  <update id="reduceCommentCount" parameterType="integer">
+    update article
+    set comment_count = comment_count - 1
+    where id = #{id}
+  </update>
+
+  <update id="incrementVoteCount" parameterType="integer">
+    update article
+    set vote_count = vote_count + 1
+    where id = #{id}
+  </update>
+
+  <update id="reduceVoteCount" parameterType="integer">
+    update article
+    set vote_count = vote_count - 1
+    where id = #{id}
+  </update>
+
+
+</mapper>

@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wayming.codeland.dao.SysUserMapper" >
+  <resultMap id="BaseResultMap" type="com.wayming.codeland.pojo.eo.SysUser" >
+    <constructor >
+      <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="username" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="password" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="realname" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="nickname" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="bio" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="avatar" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="email" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="phone" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="active" jdbcType="BIT" javaType="java.lang.Boolean" />
+      <arg column="active_code" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="visited_count" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="lastlogin_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+    </constructor>
+  </resultMap>
+
+  <resultMap id="BaseWithRolesResultMap" type="com.wayming.codeland.pojo.eo.SysUser" >
+    <constructor >
+      <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="username" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="password" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="realname" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="nickname" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="bio" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="avatar" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="email" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="phone" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="active" jdbcType="BIT" javaType="java.lang.Boolean" />
+      <arg column="active_code" jdbcType="VARCHAR" javaType="java.lang.String" />
+      <arg column="visited_count" jdbcType="INTEGER" javaType="java.lang.Integer" />
+      <arg column="lastlogin_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+      <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+    </constructor>
+    <collection  property="roleList" ofType="com.wayming.codeland.pojo.eo.SysRole">
+      <id  property="id" column="rid"/>
+      <result property="name" column="rname"/>
+    </collection>
+  </resultMap>
+
+  <sql id="Base_Column_List" >
+    id, username, password, realname, nickname, bio, avatar, email, phone, active, active_code, 
+    visited_count, lastlogin_time, create_time, update_time
+  </sql>
+
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select
+    <include refid="Base_Column_List" />
+    from sys_user
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+
+  <select id="findByUsername" parameterType="string" resultMap="BaseWithRolesResultMap">
+    select
+    u.*,
+    r.id as rid,r.name as rname
+    from sys_user u join sys_user_role ur on ur.user_id = u.id
+    join sys_role r on r.id = ur.role_id
+    where u.username = #{username} and u.active != 0
+  </select>
+
+  <select id="findByActiveCode" parameterType="string" resultType="com.wayming.codeland.pojo.eo.SysUser">
+    select <include refid="Base_Column_List" />
+    from sys_user
+    where active_code = #{activeCode}
+  </select>
+
+  <select id="listUser" resultType="com.wayming.codeland.pojo.eo.SysUser" >
+    select <include refid="Base_Column_List" />
+    from sys_user
+    where active != 0
+  </select>
+
+  <select id="listUserByHot" resultType="com.wayming.codeland.pojo.eo.SysUser">
+    select <include refid="Base_Column_List" />
+    from sys_user
+    where active != 0
+    order by visited_count desc
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from sys_user
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+  <delete id="deleteByInvalid">
+  delete from sys_user
+    where active = 0;
+  </delete>
+
+
+  <insert id="insert" parameterType="com.wayming.codeland.pojo.eo.SysUser" >
+    insert into sys_user (id, username, password, 
+      realname, nickname, bio, 
+      avatar, email, phone, 
+      active, active_code, visited_count, 
+      lastlogin_time, create_time, update_time
+      )
+    values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
+      #{realname,jdbcType=VARCHAR}, #{nickname,jdbcType=VARCHAR}, #{bio,jdbcType=VARCHAR}, 
+      #{avatar,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, 
+      #{active,jdbcType=BIT}, #{activeCode,jdbcType=VARCHAR}, #{visitedCount,jdbcType=INTEGER}, 
+      #{lastloginTime,jdbcType=TIMESTAMP}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+
+
+  <insert id="insertSelective" parameterType="com.wayming.codeland.pojo.eo.SysUser" >
+    insert into sys_user
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="username != null" >
+        username,
+      </if>
+      <if test="password != null" >
+        password,
+      </if>
+      <if test="realname != null" >
+        realname,
+      </if>
+      <if test="nickname != null" >
+        nickname,
+      </if>
+      <if test="bio != null" >
+        bio,
+      </if>
+      <if test="avatar != null" >
+        avatar,
+      </if>
+      <if test="email != null" >
+        email,
+      </if>
+      <if test="phone != null" >
+        phone,
+      </if>
+      <if test="active != null" >
+        active,
+      </if>
+      <if test="activeCode != null" >
+        active_code,
+      </if>
+      <if test="visitedCount != null" >
+        visited_count,
+      </if>
+      <if test="lastloginTime != null" >
+        lastlogin_time,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="username != null" >
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="realname != null" >
+        #{realname,jdbcType=VARCHAR},
+      </if>
+      <if test="nickname != null" >
+        #{nickname,jdbcType=VARCHAR},
+      </if>
+      <if test="bio != null" >
+        #{bio,jdbcType=VARCHAR},
+      </if>
+      <if test="avatar != null" >
+        #{avatar,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="active != null" >
+        #{active,jdbcType=BIT},
+      </if>
+      <if test="activeCode != null" >
+        #{activeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="visitedCount != null" >
+        #{visitedCount,jdbcType=INTEGER},
+      </if>
+      <if test="lastloginTime != null" >
+        #{lastloginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.wayming.codeland.pojo.eo.SysUser" >
+    update sys_user
+    <set >
+      <if test="username != null" >
+        username = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="realname != null" >
+        realname = #{realname,jdbcType=VARCHAR},
+      </if>
+      <if test="nickname != null" >
+        nickname = #{nickname,jdbcType=VARCHAR},
+      </if>
+      <if test="bio != null" >
+        bio = #{bio,jdbcType=VARCHAR},
+      </if>
+      <if test="avatar != null" >
+        avatar = #{avatar,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="active != null" >
+        active = #{active,jdbcType=BIT},
+      </if>
+      <if test="activeCode != null" >
+        active_code = #{activeCode,jdbcType=VARCHAR},
+      </if>
+      <if test="visitedCount != null" >
+        visited_count = #{visitedCount,jdbcType=INTEGER},
+      </if>
+      <if test="lastloginTime != null" >
+        lastlogin_time = #{lastloginTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.wayming.codeland.pojo.eo.SysUser" >
+    update sys_user
+    set username = #{username,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      realname = #{realname,jdbcType=VARCHAR},
+      nickname = #{nickname,jdbcType=VARCHAR},
+      bio = #{bio,jdbcType=VARCHAR},
+      avatar = #{avatar,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      active = #{active,jdbcType=BIT},
+      active_code = #{activeCode,jdbcType=VARCHAR},
+      visited_count = #{visitedCount,jdbcType=INTEGER},
+      lastlogin_time = #{lastloginTime,jdbcType=TIMESTAMP},
+      create_time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+
+  <update id="incrementVisitCount" parameterType="string">
+    update sys_user set visited_count = visited_count + 1
+    where username = #{username}
+  </update>
+</mapper>

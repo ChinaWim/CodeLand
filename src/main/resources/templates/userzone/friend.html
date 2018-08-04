@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="~{fragments/header :: header}">
+</head>
+<body>
+<!-- Page Content -->
+<div class="container my-4">
+
+    <div class="row">
+
+        <!-- 左侧栏目 -->
+        <div class="col-md-4 col-xl-3" >
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card" style="height: 600px">
+                        <h5 class="card-header"><i class="fa fa-address-book" aria-hidden="true"></i> 新朋友</h5>
+                        <ul class="list-group">
+                                <span class="text-center" th:if="${newFriendList.size() == 0}">
+                                    还未有好友申请哦～
+                                </span>
+                                <li  class="list-group-item " title="好友申请" th:each="newFriend : ${newFriendList}">
+                                    <img class="user-avatar-50" th:src="${newFriend.friendUser.avatar  } == null ? '/images/default-avatar.jpg' : ${newFriend.friendUser.avatar} ">
+                                    [[${newFriend.friendUser.nickname}]]
+                                    <a href="javascript:void(0)" id="applyFriend" class=" btn badge badge-success">接受</a>
+                                    <a href="javascript:void(0)" id="rejuestFriend" class=" btn badge badge-danger">拒绝</a>
+                                </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 右侧栏目 -->
+
+        <div class="col-md-8 col-xl-9">
+            <!-- 我的好友 -->
+            <div class="card">
+                <h5 class="card-header"><i class="fa fa-address-book" aria-hidden="true"></i> 我的好友</h5>
+                <div class="card-body">
+                    <!--method="post"  th:action="@{'/user/'+ ${#authentication.name}+'/updateProfile'}"-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.row -->
+
+</div>
+<!-- /.container -->
+
+
+<div th:replace="~{fragments/footer :: footer}">...</div>
+<script th:src="@{/js/userzone/profile.js}"></script>
+
+<script th:inline="javascript">
+
+
+</script>
+</body>
+</html>

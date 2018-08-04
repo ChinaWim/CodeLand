@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="~{fragments/header :: header}">
+</head>
+<body>
+<!-- Page Content -->
+<div class="container my-4">
+    <div class="row">
+        <!-- 左侧栏目 -->
+        <div class="col-md-5 col-xl-4">
+            <div class="row ">
+                <div class="col-md-12">
+                    <span>
+                      <a href="#"  th:title="${user.username}">
+                        <img th:src="${user.avatar} == null ?
+                        '/images/default-avatar.jpg' : ${user.avatar}" class="user-avatar-250" />
+                        <!--<img th:src="@{/images/default-avatar.jpg}"-->
+                             <!--class="user-avatar-250"-->
+                             <!--alt="头像" th:alt="头像">-->
+                      </a>
+                    </span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h3>[[${user.nickname}]]</h3>
+                    <div>ID: [[${user.username}]]  </div>
+                    <div>姓名: [[${user.realname}]]</div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <a>
+                        访问量：[[${user.visitedCount}]]
+                    </a>
+                </div>
+                <div class="col-md-12" style="word-wrap: break-word;">
+                    个性签名：[[${user.bio}]]
+                </div>
+            </div>
+            <div class="row ">
+
+                <div class="col-md-12 " th:if="${user.username ne #authentication.name}">
+                    <a href="javascript:void(0)" id="applyFriend" class=" btn badge badge-info">＋关注</a>
+                </div>
+
+                <div class="col-md-12">
+                    <a th:href="'mailto:'+${user.email}" style="font-size: 20px">
+                        <i class="fa fa-envelope-o" aria-hidden="true"></i>
+                        [[${user.email}]]
+                    </a>
+                </div>
+            </div>
+            <hr>
+
+            <!-- 分类 -->
+            <div class="card my-4" id="catalogMain">
+                <div id ="catalogRepleace">
+                    <h5 class="card-header"><i class="fa fa-bars" aria-hidden="true"></i>
+                        分类
+                        <a data-target="#flipFlop" role="button"href="javascript:void(0)" th:if="${isCatalogsOwner}" class=" blog-right" data-toggle="modal">
+                            <i class="fa fa-plus float-right" aria-hidden="true"></i>
+                        </a>
+                    </h5>
+                    <ul class="list-group">
+                        <li th:each="catalog : ${catalogList}" href="#" class="list-group-item d-flex justify-content-between align-items-center">
+                            <a href="#">
+                                <span class=" badge badge-primary badge-pill">
+                                    [[${catalog.articleList.size()}]]
+                                </span>
+                                [[${catalog.name}]]
+                            </a>
+
+                            <span  th:if="${isCatalogsOwner}" >
+	                		<!--<a href="javascript:void(0)"  class="blog-edit-catalog" data-toggle="modal"-->
+                               <!--data-target="#flipFlop" role="button" ><i class="fa fa-pencil-square-o" aria-hidden="true"></i>-->
+                            <!--</a>-->
+	                		<a href="javascript:void(0)"  class = "deleteCatalog" th:attr="catalogId=${catalog.id}"  >
+                                <i class="fa fa-times" aria-hidden="true"></i></a>
+	            		</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧栏目 -->
+
+        <div class="col-md-7 col-xl-8">
+            <!-- 工具栏 -->
+            <ul class="nav nav-tabs mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link " th:data-th-classappend="${userSort} eq 'new' ? 'active' : ''"
+                       href="javascript:void(0)" id = "newSearch" >最新</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" th:data-th-classappend="${userSort} eq 'hot' ? 'active' : ''"
+                       href="javascript:void(0)" id = "hotSearch" >最热</a>
+                </li>
+
+                <form class="form-inline mt-2 mt-md-0">
+                    <input th:value="${userKeyword}" class="form-control mr-sm-2" type="text" placeholder="标签/标题/摘要/内容" id="userKeyword" >
+                    <a href="javascript:void(0)" class="btn btn-outline-secondary my-2 my-sm-0" id="searchBlogs">
+                        <i class="fa fa-search" aria-hidden="true"></i>
+                    </a>
+                </form>
+            </ul>
+
+            <!-- Blog Post -->
+            <div >
+                <div class="card mb-4" th:each="article,i: ${page.data}">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                               <span  class="text-success "  th:if="${article.type eq 0}">
+                                原创
+                               </span>
+                            <span class="text-warning" th:if="${article.type eq 1}">
+                                翻译
+                               </span>
+                            <span class="text-danger" th:if="${article.type eq 2}">
+                                转载
+                               </span>
+                            <a  class="card-link"  th:href="@{'/article/'+${article.user.username}+'/'+${article.id}}">
+                                [[${article.title}]]
+                            </a>
+                        </h4>
+                        <p class="card-text">
+                            [[${article.summary}]]
+                        </p>
+                        <div class="card-text">
+                            发表于[[${#dates.format(article.createTime,'yyyy-MM-dd HH:mm')}]]
+                            <i class="fa fa-eye" aria-hidden="true">[[${article.readCount}]]</i>
+                            <i class="fa fa-heart-o" aria-hidden="true">[[${article.voteCount}]]</i>
+                            <i class="fa fa-comment-o" aria-hidden="true">[[${article.commentCount}]]</i>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${page.data.size() ne 0}"  >
+                    <div th:replace="~{fragments/page :: page}"></div>
+                </div>
+                <div class="text-center" th:if="${page.data.size() eq 0}" >
+                    emmmmm........找不到文章
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.row -->
+
+    <!-- 添加 删除分类 -->
+    <div class="modal fade" id="flipFlop" tabindex="-1" role="dialog"
+         aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="modalLabel">新增/编辑</h4>
+                    <button type="button" class="close" data-dismiss="modal"
+                            aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="container" >
+                    <form id="catalogForm">
+                        <input type="hidden" name="id"  id="catalogId">
+                        <div class="form-group">
+                            <label for="catalogName" class="col-form-label">分类名称</label>
+                            <input type="text" class="form-control" id="catalogName" name="name" minlength="1" maxlength="10" placeholder="请输入，至少1个字符，至多10个" >
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" data-dismiss="modal" id="submitEditCatalog">提交</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+</div>
+<!-- /.container -->
+<div th:replace="~{fragments/footer :: footer}">...</div>
+
+</body>
+<!-- JavaScript -->
+<script th:inline="javascript">
+    $(function () {
+        // 获取 CSRF Token
+        var csrfToken = $("meta[name='_csrf']").attr("content");
+        var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+
+        var username = [[${user.username}]];
+        var applyFriendUrl = "/user/applyFriend";
+        var friendId = [[${user.id}]];
+
+        var keyword = $("#userKeyword").val();
+        var sort = [[${userSort}]];
+        //分页
+        $.each($(".tbpage-item"),function (index,data) {
+            var pageData = $(data);
+            pageData.attr("href","/user/"+username+"/mainPage?pageNo="+pageData.attr("pageIndex")
+                +"&keyword="+keyword+"&sort="+sort);
+        });
+
+
+        //关注博主
+        $("#applyFriend").click(function () {
+            $.ajax({
+                url: applyFriendUrl,
+                type: 'POST',
+                data: {"friendId":friendId},
+                beforeSend: function (request) {
+                    request.setRequestHeader(csrfHeader, csrfToken); // 添加  CSRF Token
+                },
+                success: function (data) {
+                    if (data.status == 200) {
+                        toastr.info(data.message);
+                    } else {
+                        toastr.error(data.message);
+                    }
+                },
+                error: function () {
+                    toastr.error("error!");
+                }
+            });
+        });
+
+        //关键字搜索
+        $("#searchBlogs").click(function () {
+                location.href = "/user/"+username+"/mainPage?keyword="+$("#userKeyword").val();
+        });
+
+        //newSearch搜索
+        $("#newSearch").click(function () {
+            location.href = "/user/"+username+"/mainPage?sort=new&keyword="+$("#userKeyword").val();
+        });
+        //hotSearch搜索
+        $("#hotSearch").click(function () {
+            location.href = "/user/"+username+"/mainPage?sort=hot&keyword="+$("#userKeyword").val();
+        });
+
+
+
+        // 用户主提交分类
+        $("#submitEditCatalog").click(function() {
+            $.ajax({
+                url: '/catalog/createCatalog',
+                type: 'POST',
+                data:{"id":$('#catalogId').val(), "name":$('#catalogName').val()},
+                beforeSend: function(request) {
+                    request.setRequestHeader(csrfHeader, csrfToken); // 添加  CSRF Token
+                },
+                success: function(data){
+                    if (data.status == 200) {
+                        // toastr.info(data.message);
+                        location.href  = "/user/"+username+"/mainPage";
+                    } else {
+                        toastr.error(data.message);
+                    }
+                },
+                error : function() {
+                    toastr.error("error!");
+                }
+            });
+        });
+
+        // 用户主删除分类
+        $(".deleteCatalog").click(function () {
+            var catalogId = $(this).attr('catalogId');
+            layer.confirm('确认要删除此分类吗？', {
+                btn: ['确定','取消'] //按钮
+            }, function(){
+                $.ajax({
+                    url: '/catalog/deleteCatalog/'+catalogId,
+                    type: 'DELETE',
+                    beforeSend: function(request) {
+                        request.setRequestHeader(csrfHeader, csrfToken); // 添加  CSRF Token
+                    },
+                    success: function(data){
+                        if (data.success) {
+                            toastr.info(data.message);
+                            // 成功后，刷新列表
+                            location.href  = "/user/"+username+"/mainPage";
+                        } else {
+                            toastr.error(data.message);
+                        }
+                    },
+                    error : function() {
+                        toastr.error("error!");
+                    }
+                });
+
+            }, function(){
+            });
+
+
+        });
+
+
+
+    });
+</script>
+</html>

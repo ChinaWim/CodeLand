@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="~{fragments/header :: header}">
+</head>
+<body>
+<!-- Page Content -->
+<div class="container my-4">
+
+    <div class="row">
+
+        <!-- Blog Entries Column -->
+        <div class="col-md-8">
+            <!-- Blog Post -->
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">
+							<span>
+			                  <a th:href="@{'/user/'+${article.user.username}+'/mainPage'}" title="wayming">
+                                  <img th:src="${article.user.avatar} == null ? '/images/default-avatar.jpg' : ${article.user.avatar}" class="user-avatar-50" />
+			                  </a>
+					        </span>
+                        <a   href="#" class="card-link" title="wayming">
+                            [[${article.title}]]
+                        </a>
+                    </h2>
+                    <div class="card-text">
+                        <span style="font-size: 0.8em">
+                        <a th:href="@{'/user/'+${article.user.username}+'/mainPage'}">[[${article.user.nickname}]]</a>
+                        发表于 [[${#dates.format(article.createTime, 'yyyy-MM-dd HH:mm')}]]
+                        <i class="fa fa-eye" aria-hidden="true">[[${article.readCount}]]</i>
+                        <i class="fa fa-heart-o" aria-hidden="true">
+                            [[${article.voteCount}]]
+                        </i>
+                        <i class="fa fa-comment-o" aria-hidden="true">[[${article.commentCount}]]</i>
+                        </span>
+                        <span th:if="${#authentication.getName() eq article.user.username}">
+                            <!--<a href="/u/wayming" class="btn btn-sm btn-primary float-right">编辑</a>-->
+                            <!--float-right-->
+                            <a href="javascript:void(0)" class="btn btn-sm btn-primary  float-right delete-article">删除</a>
+                            <a href="javascript:void(0)" class="btn btn-sm btn-primary  float-right update-article">编辑</a>
+                        </span>
+                    </div>
+                    <hr>
+                    <!--内容-->
+                    <article  th:utext="${article.content}" class="post-content" style="height: 500px">
+
+                    </article>
+                    <hr>
+                </div>
+                <div class="card-body">
+                    <h5>分类：
+                        <span th:each="catalog : ${catalogList}">
+                        <a href="#"> <span class="badge badge-info">[[${catalog.name}]]</span></a>
+                        </span>
+
+                    </h5>
+                    <h5>标签：
+                        <span th:each="tag : ${#strings.arraySplit(article.tags , ',')}">
+                        <a th:href="@{'/user/'+${article.user.username}+'/mainPage?keyword='+${tag}}"> <span class="badge badge-success">[[${tag}]]</span></a>
+                        </span>
+
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <span sec:authorize="isAnonymous()">
+                        <img th:src="@{/images/default-avatar.jpg}" class="user-avatar-50" />
+                            评论：
+                    </span>
+                    <span sec:authorize="isAuthenticated()">
+                            <img th:src="${#authentication.getPrincipal().avatar} == null ? '/images/default-avatar.jpg' : ${#authentication.getPrincipal().avatar}" class="user-avatar-50" />
+                            评论：
+                    </span>
+
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <textarea  class="form-control " style="height:120px;overflow-x:hidden;resize:none;margin-bottom: 15px;" maxlength="500" placeholder="看帖需留言~" id="commentContent"></textarea>
+                        </div>
+                    </div>
+                    <button  class="btn btn-outline-primary btn-sm float-right" id="submitComment">发表评论</button>
+                    <button th:if="${articleVote == null}" title="点赞" class=" btn btn-outline-primary btn-sm float-right" id="submitVote">点赞</button>
+                    <button th:if="${articleVote != null}" title="取消点赞" class=" btn btn-outline-primary btn-sm float-right" id="submitVote">取赞</button>
+                </div>
+                <hr>
+                <div class="card-body" id="mainContainer">
+                    <div >
+                        <div  class="text-center" th:if="${commentList.size() eq 0}">
+                            当前没有人评论，快来抢沙发吧～　
+                        </div>
+                        <div th:if="${commentList.size() ge 0}" th:each="comment,i:${commentList}">
+                            <div class="row">
+                                <h2 class="card-title col-lg-1 col-md-2">
+							<span>
+			                  <a th:href="@{'/user/'+${comment.user.username}+'/mainPage'}">
+			                 <img th:src="${comment.user.avatar} == null ? '/images/default-avatar.jpg' : ${comment.user.avatar}" class="user-avatar-50" />
+			                  </a>
+					        </span>
+                                </h2>
+                                <div class="card-text col-lg-11 col-md-10">
+                                    <a th:href="@{'/user/'+${comment.user.username}+'/mainPage'}">[[${comment.user.nickname}]]</a>
+                                    <a th:if="${comment.user.username eq #authentication.getName()}" th:attr="commentId=${comment.id}" 　href="javascript:void(0)" class="delete-comment">
+                                        <i class="fa fa-trash-o" aria-hidden="true"></i>
+                                    </a>
+                                    <div class="text-secondary" style="font-size: 0.7em">[[${i.count}]]楼 · [[${#dates.format(comment.createTime,'yyyy-MM-dd HH:mm:ss')}]]</div>
+                                    <p>[[${comment.content}]]</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 右侧栏目 -->
+        <div class="col-md-4">
+            <div>
+                <!-- 文章目录 -->
+                <div class="card ">
+                    <h5 class="card-header"><i class="fa fa-bars" aria-hidden="true"></i> 文章目录</h5>
+                    <div class="card-block">
+                        <div class="row">
+                            <div id="catalog" class="col-lg-12">123</div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- 相关博客 -->
+                <div class="card my-4">
+                    <h5 class="card-header"><i class="fa fa-connectdevelop" aria-hidden="true"></i> 相关博客</h5>
+                    <div class="list-group">
+                        <ul class="list-group">
+                            <a href="/u/wayming/blogs/1" class="list-group-item" title="wayming">
+                                Spring Data + Thymeleaf 3 + Bootstrap 4 实现分页器
+                            </a>
+                        </ul>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <!-- /.row -->
+</div>
+<!-- /.container -->
+
+
+<div th:replace="~{fragments/footer :: footer}">...</div>
+
+<!-- JavaScript -->
+<script th:inline="javascript">
+    $(function () {
+        // 获取 CSRF Token
+        var csrfToken = $("meta[name='_csrf']").attr("content");
+        var csrfHeader = $("meta[name='_csrf_header']").attr("content");
+        var article_id = [[${article.id}]];
+
+        var articleUsername = [[${article.user.username}]];
+        var loginUsername = [[${#authentication.name}]];
+
+        //提交，取消点赞
+        $("#submitVote").click(function () {
+            var articleVote = [[${articleVote}]];
+            if (articleVote){
+                $.ajax({
+                    url:"/articleVote/"+article_id+"/deleteArticleVote" ,
+                    type: 'DELETE',
+                    beforeSend: function (request) {
+                        request.setRequestHeader(csrfHeader, csrfToken); // 添加  CSRF Token
+                    },
+                    success: function (data) {
+                        if (data.status == 200) {
+                            // toastr.success(data.message);
+                            location.href = "/article/"+articleUsername+"/"+article_id;
+                        } else {
+                            toastr.error(data.message);
+                        }
+                    },
+                    error: function () {
+                        toastr.error("error!");
+                    }
+                });
+            } else {
+                $.ajax({
+                    url:"/articleVote/"+article_id+"/addArticleVote" ,
+                    type: 'POST',
+                    beforeSend: function (request) {
+                        request.setRequestHeader(csrfHeader, csrfToken); // 添加  CSRF Token
+                    },
+                    success: function (data) {
+                        if (data.status == 200) {
+                            // toastr.success(data.message);
+                            location.href = "/article/"+articleUsername+"/"+article_id;
+                        } else {
+                            toastr.error(data.message);
+                        }
+                    },
+                    error: function () {
+                        toastr.error("error!");
+                    }
+                });
+            }
+        });
+
+        //删除博客
+        $(".delete-article").click(function () {
+            $.ajax({
+                url:"/article/"+articleUsername+"/deleteArticle/"+article_id ,
+                type: 'DELETE',
+                beforeSend: function (request) {
+                    request.setRequestHeader(csrfHeader, csrfToken); // 添加  CSRF Token
+                },
+                success: function (data) {
+                    if (data.status == 200) {
+                        // toastr.success(data.message);
+                        location.href = "/user/"+articleUsername+"/mainPage";
+                    } else {
+                        toastr.error(data.message);
+                    }
+                },
+                error: function () {
+                    toastr.error("error!");
+                }
+            });
+
+        });
+
+        //发表评论
+        $("#submitComment").click(function () {
+            $.ajax({
+                url:"/comment/saveComment" ,
+                type: 'POST',
+                data: {"content":$("#commentContent").val(),"articleId":article_id},
+                beforeSend: function (request) {
+                    request.setRequestHeader(csrfHeader, csrfToken); // 添加  CSRF Token
+                },
+                success: function (data) {
+                    if (data.status == 200) {
+                        // toastr.success(data.message);
+                        location.href = "/article/"+articleUsername+"/"+article_id;
+                    } else {
+                        toastr.error(data.message);
+                    }
+                },
+                error: function () {
+                    toastr.error("error!");
+                }
+            });
+        });
+
+
+
+        //删除评论
+        $(".delete-comment").click(function () {
+            var comment_id = $(this).attr("commentId");
+            $.ajax({
+                url:"/comment/deleteComment/"+article_id+"/"+comment_id ,
+                type: 'DELETE',
+                beforeSend: function (request) {
+                    request.setRequestHeader(csrfHeader, csrfToken); // 添加  CSRF Token
+                },
+                success: function (data) {
+                    if (data.status == 200) {
+                        // toastr.success(data.message);
+                        location.href = "/article/"+articleUsername+"/"+article_id;
+                    } else {
+                        toastr.error(data.message);
+                    }
+                },
+                error: function () {
+                    toastr.error("error!");
+                }
+            });
+        });
+
+        //编辑博客
+        $(".update-article").click(function () {
+            location.href = "/article/"+articleUsername+"/updateArticle/"+article_id;
+        });
+
+
+    });
+</script>
+
+</body>
+</html>

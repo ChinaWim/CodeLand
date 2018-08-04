@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.wayming.codeland.dao.CommentMapper" >
+    <resultMap id="BaseResultMap" type="com.wayming.codeland.pojo.eo.Comment" >
+        <constructor >
+            <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="user_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="article_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="content" jdbcType="VARCHAR" javaType="java.lang.String" />
+            <arg column="vote_count" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+            <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+        </constructor>
+    </resultMap>
+
+    <resultMap id="BaseWithSubCommentWithUserResultMap" type="com.wayming.codeland.pojo.eo.Comment" >
+        <constructor >
+            <idArg column="id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="user_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="article_id" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="content" jdbcType="VARCHAR" javaType="java.lang.String" />
+            <arg column="vote_count" jdbcType="INTEGER" javaType="java.lang.Integer" />
+            <arg column="create_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+            <arg column="update_time" jdbcType="TIMESTAMP" javaType="java.util.Date" />
+        </constructor>
+        <association property="user"  javaType="com.wayming.codeland.pojo.eo.SysUser" >
+            <result column="user_username" property="username" javaType="java.lang.String" />
+            <result column="user_realname" property="realname" javaType="java.lang.String" />
+            <result column="user_nickname" property="nickname" javaType="java.lang.String" />
+            <result column="user_bio" property="bio" javaType="java.lang.String" />
+            <result column="user_avatar" property="avatar" javaType="java.lang.String" />
+        </association>
+
+        <collection property="subCommentList" ofType="com.wayming.codeland.pojo.eo.SubComment">
+            <id property="id" column="sub_id"></id>
+            <result property="content" column="sub_content"></result>
+            <result property="createTime" column="sub_create_time"></result>
+        </collection>
+
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+    id, user_id, article_id, content, vote_count, create_time, update_time
+  </sql>
+    <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+        select
+        <include refid="Base_Column_List" />
+        from comment
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+
+    <select id="listCommentByArticleId" parameterType="integer" resultMap="BaseWithSubCommentWithUserResultMap">
+    select
+    c.*,
+    s.id sub_id, s.content sub_content,s.create_time sub_create_time,
+    u.username user_username, u.realname user_realname, u.nickname user_nickname,
+    u.bio user_bio,u.avatar user_avatar
+    from comment c
+    left join sub_comment s on s.comment_id = c.id
+    join sys_user u on c.user_id = u.id
+    where c.article_id = #{articleId}
+  </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from comment
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+
+
+    <insert id="insert" parameterType="com.wayming.codeland.pojo.eo.Comment" >
+    insert into comment (id, user_id, article_id, 
+      content, vote_count)
+    values (#{id,jdbcType=INTEGER}, #{userId,jdbcType=INTEGER}, #{articleId,jdbcType=INTEGER}, 
+      #{content,jdbcType=VARCHAR}, #{voteCount,jdbcType=INTEGER})
+  </insert>
+    <insert id="insertSelective" parameterType="com.wayming.codeland.pojo.eo.Comment" >
+        insert into comment
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                id,
+            </if>
+            <if test="userId != null" >
+                user_id,
+            </if>
+            <if test="articleId != null" >
+                article_id,
+            </if>
+            <if test="content != null" >
+                content,
+            </if>
+            <if test="voteCount != null" >
+                vote_count,
+            </if>
+
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id != null" >
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="userId != null" >
+                #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="articleId != null" >
+                #{articleId,jdbcType=INTEGER},
+            </if>
+            <if test="content != null" >
+                #{content,jdbcType=VARCHAR},
+            </if>
+            <if test="voteCount != null" >
+                #{voteCount,jdbcType=INTEGER},
+            </if>
+
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.wayming.codeland.pojo.eo.Comment" >
+        update comment
+        <set >
+            <if test="userId != null" >
+                user_id = #{userId,jdbcType=INTEGER},
+            </if>
+            <if test="articleId != null" >
+                article_id = #{articleId,jdbcType=INTEGER},
+            </if>
+            <if test="content != null" >
+                content = #{content,jdbcType=VARCHAR},
+            </if>
+            <if test="voteCount != null" >
+                vote_count = #{voteCount,jdbcType=INTEGER},
+            </if>
+
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.wayming.codeland.pojo.eo.Comment" >
+    update comment
+    set user_id = #{userId,jdbcType=INTEGER},
+      article_id = #{articleId,jdbcType=INTEGER},
+      content = #{content,jdbcType=VARCHAR},
+      vote_count = #{voteCount,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

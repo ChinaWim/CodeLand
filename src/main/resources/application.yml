@@ -1,0 +1,70 @@
+#==================== Tomcat Setting =====================#
+server:
+  servlet:
+    context-path: /
+  tomcat:
+    uri-encoding: UTF-8
+  port: 8080
+#==================== spring Setting =====================#
+spring:
+  datasource:
+    druid:
+      username: root
+      password: 47218382
+      driver-class-name: com.mysql.jdbc.Driver
+      url: jdbc:mysql://localhost:3306/codeland?useUnicode=true&characterEncoding=UTF-8&useSSL=false
+      max-active: 50
+      min-idle: 10
+      initial-size: 10
+      max-wait: 10
+      default-auto-commit: true
+  mvc:
+    view:
+      suffix: .html
+      prefix: /
+  servlet:
+    multipart:
+      max-request-size: 10MB
+      max-file-size: 30MB
+  http:
+    encoding:
+      charset: UTF-8
+#==================== thymeleaf Setting =====================#
+  thymeleaf:
+    servlet:
+      content-type: text/html
+    encoding: UTF-8
+    mode: HTML5
+    suffix: .html
+    prefix: classpath:templates/
+    cache: false
+  mail:
+    host: smtp.qq.com
+    username: 969130721@qq.com
+    password: bdywgxmohaxcbbbi
+
+
+
+#==================== mybatis Setting =====================#
+mybatis:
+  config-location: classpath:mybatisConfig.xml
+  mapper-locations: classpath:mappers/*.xml
+  type-aliases-package: com.wayming.codeland.pojo.eo
+
+pagehelper:
+    helperDialect: mysql
+    reasonable: true
+    supportMethodsArguments: true
+    params: count=countSql
+
+#==================== file server url Setting =====================#
+file:
+    server:
+           avatar:
+                  url: http://localhost:8081/codeland/avatar
+    location:
+          path: /usr/local/soft/nginx/html/codeland/avatar
+
+#==================== logging Setting =====================#
+logging:
+  config: classpath:logback.xml
